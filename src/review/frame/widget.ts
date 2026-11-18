@@ -389,6 +389,7 @@ class ReviewLayer {
   private snapshot(clientX: number, clientY: number): Promise<string | undefined> {
     const W = 480, H = 300;
     const work = (async () => {
+      await new Promise((r) => setTimeout(r, 50));
       const g = window as unknown as { __OPENMARKUP_SNAP__?: (n: Node, o: object) => Promise<HTMLCanvasElement> };
       if (!g.__OPENMARKUP_SNAP__) {
         await new Promise<void>((ok, bad) => {
@@ -400,9 +401,20 @@ class ReviewLayer {
         });
       }
       const vw = window.innerWidth, vh = window.innerHeight;
+      // Big page builders can have thousands of elements: copying them all freezes the page. Only copy what is on screen,
+      // skip embedded media, and don't download web fonts (the picture is a rough guide, not a pixel-perfect copy).
+      const skip = new Set(['SCRIPT', 'NOSCRIPT', 'IFRAME', 'VIDEO', 'AUDIO', 'OBJECT', 'EMBED', 'TEMPLATE']);
+      const keep = (n: Node): boolean => {
+        if (n === this.host) return false;
+        if (!(n instanceof Element)) return true;
+        if (skip.has(n.tagName)) return false;
+        const r = n.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) return true;
+        return !(r.bottom < -40 || r.top > vh + 40 || r.right < -40 || r.left > vw + 40);
+      };
       const full = await g.__OPENMARKUP_SNAP__!(document.documentElement, {
         width: vw, height: vh, scale: 1, backgroundColor: getComputedStyle(document.body).backgroundColor || '#fff',
-        filter: (n: Node) => n !== this.host,
+        filter: keep, font: false, timeout: 3000,
         style: { transform: `translate(${-window.scrollX}px, ${-window.scrollY}px)` },
       });
       const out = document.createElement('canvas');
