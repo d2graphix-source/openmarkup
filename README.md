@@ -6,7 +6,7 @@ Share a link with people who have no login, and export every comment as Markdown
 - **Desktop, tablet and phone** sizes, each with its own comments.
 - **Browse / Comment** switch: use the site normally, then click anything to pin a comment.
 - **Threads** with replies, resolve and reopen, and editing your own words (marked "edited").
-- **Pictures**: a screenshot around each click is saved with the comment, and up to four images can be attached.
+- **Pictures**: paste, drop or pick up to four images per comment.
 - **Share links** for guests: look-only or comment, switch off or replace any time. Guests give a name to comment.
 - **Pages behind a login**: a second link opens the real site with a small comment panel, so reviewers log in with
   their own account and still comment.
