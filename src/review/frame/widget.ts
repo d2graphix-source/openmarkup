@@ -373,11 +373,9 @@ class ReviewLayer {
       const pageUrl = this.currentPageUrl();
       this.addPending(tempId, anchor, el);
       this.closeComposer();
-      // The picture is taken after Post, not while typing: drawing a big page is slow and would make typing lag.
-      // Use where the clicked spot is now, in case the page scrolled while the comment was written.
-      const r = el.isConnected ? el.getBoundingClientRect() : null;
-      const px = r && r.width ? r.left + anchor.fx * r.width : clientX, py = r && r.height ? r.top + anchor.fy * r.height : clientY;
-      void this.snapshot(px, py).then((snapshot) => this.post({ type: 'thread:create', draft: { tempId, pageUrl, pageKey: pageKey(pageUrl), anchor, body, snapshot, images } }));
+      // No automatic screenshot: redrawing a big page builder in the browser lags and often comes out blank.
+      // People paste or attach their own picture instead (Win+Shift+S, then Ctrl+V into the box).
+      this.post({ type: 'thread:create', draft: { tempId, pageUrl, pageKey: pageKey(pageUrl), anchor, body, images } });
     });
 
     this.composer = { anchor, el, panel };
