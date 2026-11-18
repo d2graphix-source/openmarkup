@@ -338,7 +338,6 @@ class ReviewLayer {
 
   private openComposer(el: Element, clientX: number, clientY: number): void {
     const anchor = buildAnchor(el, clientX, clientY);
-    const snap = this.snapshot(clientX, clientY); // started now, before our panel is drawn
     const panel = h('div', 'panel');
     const form = h('form');
     const input = h('textarea');
@@ -374,7 +373,11 @@ class ReviewLayer {
       const pageUrl = this.currentPageUrl();
       this.addPending(tempId, anchor, el);
       this.closeComposer();
-      void snap.then((snapshot) => this.post({ type: 'thread:create', draft: { tempId, pageUrl, pageKey: pageKey(pageUrl), anchor, body, snapshot, images } }));
+      // The picture is taken after Post, not while typing: drawing a big page is slow and would make typing lag.
+      // Use where the clicked spot is now, in case the page scrolled while the comment was written.
+      const r = el.isConnected ? el.getBoundingClientRect() : null;
+      const px = r && r.width ? r.left + anchor.fx * r.width : clientX, py = r && r.height ? r.top + anchor.fy * r.height : clientY;
+      void this.snapshot(px, py).then((snapshot) => this.post({ type: 'thread:create', draft: { tempId, pageUrl, pageKey: pageKey(pageUrl), anchor, body, snapshot, images } }));
     });
 
     this.composer = { anchor, el, panel };
@@ -415,6 +418,13 @@ class ReviewLayer {
       const full = await g.__OPENMARKUP_SNAP__!(document.documentElement, {
         width: vw, height: vh, scale: 1, backgroundColor: getComputedStyle(document.body).backgroundColor || '#fff',
         filter: keep, font: false, timeout: 3000,
+        // The copy restarts CSS animations from their first frame, so fade-in sections would come out invisible
+        // (a blank, dark picture). Freeze them at the state copied from the page.
+        onCreateForeignObjectSvg: (svg: SVGSVGElement) => {
+          const st = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+          st.textContent = '*,*::before,*::after{animation:none!important;transition:none!important}';
+          svg.prepend(st);
+        },
         style: { transform: `translate(${-window.scrollX}px, ${-window.scrollY}px)` },
       });
       const out = document.createElement('canvas');
