@@ -11,6 +11,8 @@ Share a link with people who have no login, and export every comment as Markdown
 - **Pages behind a login**: a second link opens the real site with a small comment panel, so reviewers log in with
   their own account and still comment.
 - **Change address**: when a site moves to a new domain, every comment moves with it (the old domain is kept as an alias).
+- **Claude connection (MCP)**: each member can make a private connector address on their account page. Claude can then
+  list reviews, read every comment (page, element, screenshot) and reply or mark comments resolved, as that member.
 - **Markdown export**: "Copy as markdown" or download a `.md` file, grouped by screen size and page, with each element's
   selector, text and picture links.
 
@@ -43,7 +45,8 @@ as the signed-in person, so row-level security applies. Only the app's own hostn
 5. Authentication > URL Configuration: set Site URL to your app address.
 6. Project Settings > API: copy the URL, the `anon` key and the `service_role` key for the next step.
 
-Upgrading a database made with an earlier version? Run `supabase/upgrade-2026-11.sql` once.
+Upgrading a database made with an earlier version? Run `supabase/upgrade-2026-11.sql` once, then
+`supabase/upgrade-2026-11-mcp.sql` (the Claude connection).
 
 ### 2. Vercel
 1. Import the GitHub repo as a new project (framework: Next.js; no build settings to change).
@@ -54,6 +57,11 @@ Upgrading a database made with an earlier version? Run `supabase/upgrade-2026-11
 Add the script tag to the site's `<head>`. The full guide, including where it goes on WordPress and what to do if the
 site blocks framing, is [docs/SCRIPT.md](docs/SCRIPT.md). A running app also serves it at `/setup.md` with its own
 address filled in, and every review page shows the exact tag.
+
+### 4. Connect Claude (optional)
+Account > Connect Claude > Make a connection address. In Claude: Settings > Connectors > Add custom connector, paste the
+address. Tools: `list_reviews`, `get_review`, `reply_to_comment`, `resolve_comment`. The address works like a password:
+"Make a new address" replaces it, "Disconnect" removes it.
 
 ## Development
 ```bash

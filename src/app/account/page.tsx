@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getMember } from "@/lib/session.ts";
 import { renameMeAction } from "@/review/actions.ts";
 import { Notices, Shell } from "@/components/Shell.tsx";
+import { ConnectClaude } from "@/components/ConnectClaude.tsx";
+import { createAdminClient } from "@/lib/supabase/admin.ts";
+import { adminConfigured } from "@/lib/env.ts";
 
 export const metadata = { title: "Account · OpenMarkup" };
 
@@ -9,6 +12,9 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const member = await getMember();
   if (!member) redirect("/login");
+  const { data: key } = adminConfigured()
+    ? await createAdminClient().from("mcp_keys").select("last_used_at").eq("user_id", member.id).maybeSingle()
+    : { data: null };
   return (
     <Shell member={member}>
       <h1 className="om-h1">Your account</h1>
@@ -21,6 +27,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           <div><button className="om-btn om-btn--light">Save</button></div>
         </form>
       </section>
+      <ConnectClaude connected={Boolean(key)} lastUsed={key?.last_used_at ?? null} />
     </Shell>
   );
 }

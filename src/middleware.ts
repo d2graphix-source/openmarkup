@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Runs on every page request: refreshes the login cookie and sends anyone not signed in to /login.
 // The database still decides what each person can read and change.
-const PUBLIC = ["/setup.md", "/login", "/auth", "/live", "/review-assets", "/favicon.ico"];
+const PUBLIC = ["/setup.md", "/login", "/auth", "/live", "/review-assets", "/favicon.ico", "/api/mcp"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });

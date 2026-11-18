@@ -5,7 +5,7 @@ import type { ReviewThread } from "./shared/protocol.ts";
 const oneLine = (s: string) => s.replace(/\s+/g, " ").trim();
 const quote = (s: string) => s.split("\n").map((l) => `> ${l}`).join("\n");
 
-export function reviewToMarkdown(review: { title: string; site_origin: string }, threads: ReviewThread[]): string {
+export function reviewToMarkdown(review: { title: string; site_origin: string }, threads: ReviewThread[], opts: { ids?: boolean } = {}): string {
   const open = threads.filter((t) => !t.resolved).length;
   const lines: string[] = [
     `# ${oneLine(review.title) || "Website review"}`,
@@ -25,6 +25,7 @@ export function reviewToMarkdown(review: { title: string; site_origin: string },
         n++;
         const a = t.anchor;
         lines.push("", `### Change ${n}${t.resolved ? " (resolved)" : ""}`);
+        if (opts.ids) lines.push(`Comment id: ${t.id}`);
         lines.push(`Page: ${t.pageUrl}`);
         if (a?.selector) lines.push(`Element: \`${a.selector}\``);
         if (a?.text) lines.push(`Element text: "${oneLine(a.text).slice(0, 200)}"`);
